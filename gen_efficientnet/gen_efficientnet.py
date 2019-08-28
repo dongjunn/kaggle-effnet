@@ -146,7 +146,8 @@ class GenEfficientNet(nn.Module):
             self.efficient_head = head_conv == 'efficient'
             self.conv_head = select_conv2d(in_chs, num_features, 1, padding=pad_type)
             self.bn2 = None if self.efficient_head else nn.BatchNorm2d(num_features, **bn_args)
-
+        self.bn3 = nn.BatchNorm1d(num_features*2, eps=1e-5, momentum=0.1, affine=True,
+                                  track_running_stats=True)
         self.classifier = nn.Linear(num_features, num_classes)
 
         for m in self.modules():
@@ -173,13 +174,13 @@ class GenEfficientNet(nn.Module):
         avg = F.adaptive_avg_pool2d(x, 1)
         max = F.adaptive_max_pool2d(x, 1)
         x = torch.cat([avg, max], 1)
+        print(f'Maxpool Avg pool shape {x.size()}')
         return x
 
     def forward(self, x):
         x = self.features(x)
         x = x.flatten(1)
-        x = nn.BatchNorm1d(x, eps=1e-5, momentum=0.1, affine=True,
-                           track_running_stats=True)
+        x = self.bn3(x)
         x = nn.Dropout(p=0.5)
         return self.classifier(x)
 
