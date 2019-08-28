@@ -178,6 +178,9 @@ class GenEfficientNet(nn.Module):
     def forward(self, x):
         x = self.features(x)
         x = x.flatten(1)
+        x = nn.BatchNorm1d(x, eps=1e-5, momentum=0.1, affine=True,
+                           track_running_stats=True)
+        x = nn.Dropout(p=0.5)
         if self.drop_rate > 0.:
             x = F.dropout(x, p=self.drop_rate, training=self.training)
         return self.classifier(x)
