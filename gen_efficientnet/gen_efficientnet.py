@@ -170,7 +170,9 @@ class GenEfficientNet(nn.Module):
                 x = self.conv_head(x)
                 x = self.bn2(x)
                 x = self.act_fn(x, inplace=True)
-            x = F.adaptive_avg_pool2d(x, 1)
+            avg = F.adaptive_avg_pool2d(x, 1)
+            max = F.adaptive_max_pool2d(x, 1)
+            x = torch.cat([avg, max], 1)
         return x
 
     def forward(self, x):
