@@ -170,9 +170,9 @@ class GenEfficientNet(nn.Module):
                 x = self.conv_head(x)
                 x = self.bn2(x)
                 x = self.act_fn(x, inplace=True)
-            avg = F.adaptive_avg_pool2d(x, 1)
-            max = F.adaptive_max_pool2d(x, 1)
-            x = torch.cat([avg, max], 1)
+        avg = F.adaptive_avg_pool2d(x, 1)
+        max = F.adaptive_max_pool2d(x, 1)
+        x = torch.cat([avg, max], 1)
         return x
 
     def forward(self, x):
@@ -181,8 +181,6 @@ class GenEfficientNet(nn.Module):
         x = nn.BatchNorm1d(x, eps=1e-5, momentum=0.1, affine=True,
                            track_running_stats=True)
         x = nn.Dropout(p=0.5)
-        if self.drop_rate > 0.:
-            x = F.dropout(x, p=self.drop_rate, training=self.training)
         return self.classifier(x)
 
 
